@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script>
+        const request = new XMLHttpRequest();
+        request.open("GET", "getAlbums");
+        request.send();
+        request.onreadystatechange = function()
+        {
+            if(request.readyState === request.DONE && request.status===200)
+            {
+                const info = JSON.parse(request.response);
+                for(let i = 0; i < info.length; i++)
+                {
+                    const elem = document.createElement("a");
+                    elem.appendChild(document.createTextNode(info[i].name));
+                    elem.href="album/" + info[i].albumId;
+                    document.body.appendChild(elem);
+                    document.body.appendChild(document.createElement("br"));
+                }
+            }
+        }
+    </script>
+</body>
+</html>

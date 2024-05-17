@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="artists"></div>
+    <script>
+        const request = new XMLHttpRequest();
+        request.open("GET", "/getSingers");
+        request.send();
+
+        request.onreadystatechange = function()
+        {
+            if(request.readyState === request.DONE && request.status===200)
+            {
+                const info = JSON.parse(request.response);
+                for(let i = 0; i < info.length; i++)
+                {
+                    const artistname = document.createElement("p");
+                    artistname.appendChild(document.createTextNode(info[i].nickname));
+                    document.getElementById("artists").appendChild(artistname);
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <button id="start_lost_update">Lost Update</button>
+  <p id="before_lost_update"></p>
+  <p id="after_lost_update"></p>
+
+  <button id="start_dirty_write">Dirty Write</button>
+  <p id="after_dirty_write"></p>
+
+  <button id="start_unrepeatable_read">Unrepeatable Read</button>
+  <p id="first_read"></p>
+  <p id="second_read"></p>
+
+  <button id="start_phantom_read">Phantom Read</button>
+  <p id="first_phantom_read"></p>
+  <p id="second_phantom_read"></p>
+
+  <button id="start_dirty_read">Dirty Read</button>
+  <p id="first_dirty_read"></p>
+  <p id="second_dirty_read"></p>
+
+
+  <script>
+
+
+    document.getElementById("start_lost_update").onclick = function ()
+    {
+      const request0 = new XMLHttpRequest();
+      request0.open("GET", "getAlbum/1");
+      request0.send();
+      request0.onreadystatechange = function()
+      {
+        if(request0.status === 200)
+        {
+          document.getElementById("before_lost_update").innerHTML = "Number of Sales Before: " + JSON.parse(request0.response).nrCopiesSold;
+        }
+      }
+
+      const request = new XMLHttpRequest();
+      request.open("POST", "lostUpdate/1")
+      request.send();
+
+      request.onreadystatechange = function()
+      {
+        if(request.status === 200)
+        {
+          const request2 = new XMLHttpRequest();
+          request2.open("GET", "getAlbum/1");
+          request2.send();
+          request2.onreadystatechange = function()
+          {
+            if(request2.status === 200)
+            {
+              document.getElementById("after_lost_update").innerHTML = "Number of Sales After: " +  JSON.parse(request2.response).nrCopiesSold;
+            }
+          }
+        }
+      }
+    }
+
+    document.getElementById("start_dirty_write").onclick = function ()
+    {
+        const request = new XMLHttpRequest();
+        request.open("POST", "dirtyWrite/1");
+        request.send();
+        request.onreadystatechange = function ()
+        {
+            if(request.status === 200)
+            {
+                const request2 = new XMLHttpRequest();
+                request2.open("GET", "http://localhost:8080/getPosition/0/0");
+                request2.send();
+                request2.onreadystatechange = function ()
+                {
+                    if(request2.status === 200)
+                    {
+                        document.getElementById("after_dirty_write").innerHTML = "Position after Dirty Write: " + request2.response;
+                    }
+                }
+            }
+        }
+    }
+
+    document.getElementById("start_unrepeatable_read").onclick = function () {
+        const request = new XMLHttpRequest();
+        request.open("GET", "unrepeatableRead/1");
+        request.send();
+        request.onreadystatechange = function () {
+            if(request.status === 200)
+            {
+                const response = JSON.parse(request.response);
+                document.getElementById("first_read").innerHTML = response[0];
+                document.getElementById("second_read").innerHTML = response[1];
+            }
+        }
+    }
+
+    document.getElementById("start_phantom_read").onclick = function () {
+      const request = new XMLHttpRequest();
+      request.open("GET", "phantomRead");
+      request.send();
+      request.onreadystatechange = function () {
+        if(request.status === 200)
+        {
+          const response = JSON.parse(request.response);
+          document.getElementById("first_phantom_read").innerHTML = "Number of songs with length greater than 120 seconds on first read: " + response[0];
+          document.getElementById("second_phantom_read").innerHTML = "Number of songs with length greater than 120 seconds on second read: " + response[1];
+        }
+      }
+    }
+
+    document.getElementById("start_dirty_read").onclick = function () {
+      const request = new XMLHttpRequest();
+      request.open("GET", "dirtyRead");
+      request.send();
+      request.onreadystatechange = function () {
+        if(request.status === 200)
+        {
+          const response = JSON.parse(request.response);
+          document.getElementById("first_dirty_read").innerHTML = "Preis found with ID 999 on first search? " + response[0];
+          document.getElementById("second_dirty_read").innerHTML = "Preis found with ID 999 on second search? " + response[1];
+        }
+      }
+    }
+  </script>
+</body>
+</html>

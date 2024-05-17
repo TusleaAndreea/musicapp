@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <h1 id="albumName"></h1>
+  <div id="artist_name"></div>
+  <div id="song_names"></div>
+  <button id="purchase_button">Purchase</button>
+  <p id="result_text"></p>
+
+  <script>
+    const url = window.location.href;
+    const albumId = url.split("/")[url.split("/").length-1];
+
+    const album_request = new XMLHttpRequest();
+    album_request.open("GET", "/getAlbum/" + albumId);
+    album_request.send();
+
+    album_request.onreadystatechange = function()
+    {
+      if(album_request.readyState === album_request.DONE && album_request.status === 200) {
+        const response = JSON.parse(album_request.response);
+        document.getElementById("albumName").innerHTML = response.name;
+        const songs_request = new XMLHttpRequest();
+        songs_request.open("GET", "/getSongs/" + response.albumId);
+        songs_request.send();
+
+        songs_request.onreadystatechange = function()
+        {
+            if(songs_request.readyState === songs_request.DONE && songs_request.status===200)
+            {
+                const info = JSON.parse(songs_request.response);
+                for(let i = 0; i < info.length; i++)
+                {
+                    const songname = document.createElement("p");
+                    songname.appendChild(document.createTextNode(info[i].name));
+                    document.getElementById("song_names").appendChild(songname);
+                }
+            }
+        }
+          const artist_request = new XMLHttpRequest();
+          artist_request.open("GET", "/getSinger/" + response.singerId);
+          artist_request.send();
+
+          artist_request.onreadystatechange = function()
+          {
+              if(artist_request.readyState === artist_request.DONE && artist_request.status===200)
+              {
+                  const info = JSON.parse(artist_request.response);
+                  const songname = document.createElement("h2");
+                  songname.appendChild(document.createTextNode("by " + info.nickname));
+                  document.getElementById("artist_name").appendChild(songname);
+              }
+          }
+      }
+    }
+
+    document.getElementById("purchase_button").onclick = function()
+    {
+      const request = new XMLHttpRequest();
+      request.open("POST", "/purchase/" + albumId);
+      request.send();
+
+      request.onreadystatechange = function()
+      {
+        if(request.readyState === request.DONE && request.status === 200)
+          document.getElementById("result_text").innerHTML = "Successfully purchased album";
+      }
+    }
+  </script>
+</body>
+</html>
